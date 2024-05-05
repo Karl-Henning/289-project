@@ -5,7 +5,6 @@ name = "pypi"
 
 [packages]
 ipykernel = "*"
-gymnasium = {extras = ["box2d"], version = "*"}
 matplotlib = "*"
 numpy = "*"
 seaborn = "*"
@@ -15,6 +14,7 @@ opencv-python = "*"
 tensorboardx = "*"
 pyyaml = "*"
 tensorboard = "*"
+gymnasium = {extras = ["mujoco"], version = "*"}
 
 [dev-packages]
 

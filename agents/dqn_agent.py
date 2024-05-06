@@ -26,7 +26,9 @@ class DQNAgent(nn.Module):
         super().__init__()
 
         self.critic = make_critic(observation_shape, num_actions)
+        print(self.critic)
         self.target_critic = make_critic(observation_shape, num_actions)
+        print(self.target_critic)
         self.critic_optimizer = make_optimizer(self.critic.parameters())
         self.lr_scheduler = make_lr_schedule(self.critic_optimizer)
 

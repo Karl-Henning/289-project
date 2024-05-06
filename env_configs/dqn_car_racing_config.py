@@ -3,6 +3,7 @@ from typing import Optional, Tuple
 import gymnasium as gym
 from gymnasium.wrappers.frame_stack import FrameStack
 from gymnasium.wrappers.gray_scale_observation import GrayScaleObservation
+from gymnasium.wrappers.record_episode_statistics import RecordEpisodeStatistics
 
 import numpy as np
 import torch
@@ -90,12 +91,9 @@ def car_racing_dqn_config(
     )
 
     def make_env(render: bool = False):
-        # return wrap_deepmind(
-        #     gym.make(env_name, render_mode="rgb_array" if render else None)
-        # )
-        print(env_name)
-        print(render)
         env = gym.make(env_name, render_mode="rgb_array" if render else None, continuous=False)
+
+        env = RecordEpisodeStatistics(env)
 
         # convert rgb to grayscale
         env = GrayScaleObservation(env)

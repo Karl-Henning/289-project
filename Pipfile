@@ -14,7 +14,10 @@ opencv-python = "*"
 tensorboardx = "*"
 pyyaml = "*"
 tensorboard = "*"
-gymnasium = {extras = ["mujoco"], version = "*"}
+keyboard = "*"
+gymnasium = {extras = ["box2d"], version = "*"}
+highway-env = "*"
+moviepy = "*"
 
 [dev-packages]
 

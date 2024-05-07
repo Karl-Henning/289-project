@@ -4,10 +4,13 @@ import gymnasium as gym
 from gymnasium.wrappers.frame_stack import FrameStack
 from gymnasium.wrappers.gray_scale_observation import GrayScaleObservation
 from gymnasium.wrappers.record_episode_statistics import RecordEpisodeStatistics
+from gymnasium.wrappers.transform_observation import TransformObservation
 
 import numpy as np
 import torch
 import torch.nn as nn
+
+import cv2 as cv
 
 from env_configs.schedule import (
     LinearSchedule,
@@ -20,7 +23,7 @@ import infrastructure.pytorch_util as ptu
 
 class PreprocessCarRacing(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        assert x.ndim in [3, 4], f"Bad observation shape: {x.shape}"
+        assert x.ndim in [3, 4, 5], f"Bad observation shape: {x.shape}"
         assert x.shape[-3:] == (4, 96, 96), f"Bad observation shape: {x.shape}"
         assert x.dtype == torch.uint8
 
@@ -90,6 +93,15 @@ def car_racing_dqn_config(
         outside_value=0.01,
     )
 
+    def crop_image(observation, crop_size):
+        top, right, bottom, left = crop_size
+        return observation[top:-bottom, left:-right]
+    
+    def edge_detection(observation):
+        # edge detection
+        observation = cv2.Canny(observation, 100, 200)
+        return observation
+
     def make_env(render: bool = False):
         env = gym.make(env_name, render_mode="rgb_array" if render else None, continuous=False)
 
@@ -97,6 +109,11 @@ def car_racing_dqn_config(
 
         # convert rgb to grayscale
         env = GrayScaleObservation(env)
+
+        crop_size = (0, 6, 12, 6)
+        env = TransformObservation(env, lambda obs: crop_image(obs, crop_size))
+
+        env = TransformObservation(env, edge_detection)
 
         env = FrameStack(env, num_stack=4)
         return env

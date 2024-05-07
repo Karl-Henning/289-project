@@ -145,3 +145,15 @@ class DQNAgent(nn.Module):
             self.update_target_critic()
 
         return critic_stats
+    
+    def save(self, filepath):
+        """
+        Save the model parameters to a file.
+        """
+        torch.save(self.state_dict(), filepath)
+
+    def load(self, filepath):
+        """
+        Load the model parameters from a file.
+        """
+        self.load_state_dict(torch.load(filepath))

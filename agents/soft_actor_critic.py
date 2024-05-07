@@ -59,6 +59,7 @@ class SoftActorCritic(nn.Module):
         ), "Must specify either target_update_period or soft_target_update_rate"
 
         self.actor = make_actor(observation_shape, action_dim)
+        print(self.actor)
         self.actor_optimizer = make_actor_optimizer(self.actor.parameters())
         self.actor_lr_scheduler = make_actor_schedule(self.actor_optimizer)
 
@@ -68,6 +69,7 @@ class SoftActorCritic(nn.Module):
                 for _ in range(num_critic_networks)
             ]
         )
+        print(self.critics[0])
 
         self.critic_optimizer = make_critic_optimizer(self.critics.parameters())
         self.critic_lr_scheduler = make_critic_schedule(self.critic_optimizer)
@@ -77,6 +79,7 @@ class SoftActorCritic(nn.Module):
                 for _ in range(num_critic_networks)
             ]
         )
+        print(self.target_critics[0])
         self.update_target_critic()
 
         self.observation_shape = observation_shape
@@ -102,7 +105,7 @@ class SoftActorCritic(nn.Module):
         Compute the action for a given observation.
         """
         with torch.no_grad():
-            observation = ptu.from_numpy(observation)[None]
+            observation = ptu.from_numpy(observation.__array__())[None]
 
             action_distribution: torch.distributions.Distribution = self.actor(observation)
             action: torch.Tensor = action_distribution.sample()
@@ -328,8 +331,11 @@ class SoftActorCritic(nn.Module):
             self.action_dim,
         ), action.shape
 
+        # Reshape observations for the critic network
+        obs_for_critic = obs.unsqueeze(0).repeat((self.num_actor_samples, 1, 1, 1, 1))
+
         # Compute Q-values for the sampled state-action pair
-        q_values = self.critic(obs[None].repeat((self.num_actor_samples, 1, 1)), action)
+        q_values = self.critic(obs_for_critic, action)
         assert q_values.shape == (
             self.num_critic_networks,
             self.num_actor_samples,
@@ -421,3 +427,15 @@ class SoftActorCritic(nn.Module):
             "actor_lr": self.actor_lr_scheduler.get_last_lr()[0],
             "critic_lr": self.critic_lr_scheduler.get_last_lr()[0],
         }
+    
+    def save(self, filepath):
+        """
+        Save the model parameters to a file.
+        """
+        torch.save(self.state_dict(), filepath)
+
+    def load(self, filepath):
+        """
+        Load the model parameters from a file.
+        """
+        self.load_state_dict(torch.load(filepath))

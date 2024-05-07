@@ -54,7 +54,7 @@ class CNNPolicy(nn.Module):
         self.conv_layers = nn.Sequential(*conv_layers).to(ptu.device)
 
         # Calculate the shape of the output from convolutional layers
-        conv_output_dim = 4096
+        conv_output_dim = 3136
 
         # Define fully connected layers
         if discrete:

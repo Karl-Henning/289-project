@@ -25,7 +25,7 @@ class StateActionCritic(nn.Module):
             nn.ReLU(),
         ).to(ptu.device)
 
-        conv_output_size = 4096
+        conv_output_size = 3136
         
         # # Calculate the size of the flattened output of the convolutional layers
         # with torch.no_grad():
